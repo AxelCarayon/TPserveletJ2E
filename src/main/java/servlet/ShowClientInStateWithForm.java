@@ -22,8 +22,8 @@ import simplejdbc.DataSourceFactory;
  *
  * @author Axel
  */
-@WebServlet(name = "StateForm", urlPatterns = {"/StateForm"})
-public class StateForm extends HttpServlet {
+@WebServlet(name = "ShowClientInStateWithForm", urlPatterns = {"/ShowClientInStateWithForm"})
+public class ShowClientInStateWithForm extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -43,13 +43,36 @@ public class StateForm extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet StateForm</title>");            
+            out.println("<title>Servlet ShowClientInStateWithForm</title>");            
             out.println("</head>");
             out.println("<body>");
-            try {
+            try {   // Trouver la valeur du paramètre HTTP state
+                String val = request.getParameter("state");
+                // on doit convertir cette valeur en entier (attention aux exceptions !)
+                String state1 = val;
+ 
                 DAOstateForm dao = new DAOstateForm(DataSourceFactory.getDataSource());
+                List<CustomerEntity> customer = dao.customersInState(state1);
+                // Afficher les propriétés du client 
+                out.println("<style>\n" +
+                            "table {\n" +
+                            "  font-family: arial, sans-serif;\n" +
+                            "  border-collapse: collapse;\n" +
+                            "  width: 100%;\n" +
+                            "}\n" +
+                            "\n" +
+                            "td, th {\n" +
+                            "  border: 1px solid #dddddd;\n" +
+                            "  text-align: left;\n" +
+                            "  padding: 8px;\n" +
+                            "}\n" +
+                            "\n" +
+                            "tr:nth-child(even) {\n" +
+                            "  background-color: #dddddd;\n" +
+                            "}\n" +
+                            "</style>");
                 List<String> state = dao.StateList();
-                out.println("<form action='ShowClientInState'>");
+                out.println("<form action='ShowClientInStateWithForm'>");
                 out.println("<select name='state'>");
                 for (int i=0; i<state.size();i++){
                     out.println("<option value ='"+state.get(i)+"'>"+state.get(i)+"</option>");
@@ -57,6 +80,18 @@ public class StateForm extends HttpServlet {
                 out.println("</select>");
                 out.println("<input type='submit'>");
                 out.println("</form>");
+                if (val != null) {
+                    out.println("<table>");
+                    out.println("<tr> <th>ID</th> <th>Name</th> <th>Address</th> </tr>");
+                    for (int i=0; i<customer.size();i++){
+                        out.println("<tr>");
+                        out.println("<td>"+customer.get(i).getCustomerId()+"</td>");
+                        out.println("<td>"+customer.get(i).getName()+"</td>");
+                        out.println("<td>"+customer.get(i).getAddressLine1()+"</td>");
+                        out.println("</tr>");
+                    }
+                    out.println("</table>");
+                }
             } catch (Exception e) {
                 out.printf("Erreur : %s", e.getMessage());
             }
